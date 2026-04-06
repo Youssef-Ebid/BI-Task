@@ -12,9 +12,7 @@ nltk.download("stopwords")
 nltk.download("wordnet")
 nltk.download("punkt_tab")
 
-# ─────────────────────────────────────────
-# MEMBER 1 — Data Exploration
-# ─────────────────────────────────────────
+# — Data Exploration
 
 # Load dataset
 fake_df = pd.read_csv("Fake.csv")
@@ -32,7 +30,6 @@ df.info()
 
 # First 5 rows
 df.head()
-
 # Last 3 rows
 df.tail(3)
 
@@ -57,17 +54,13 @@ plt.xlabel("Label")
 plt.ylabel("Count")
 plt.show()
 
-# ─────────────────────────────────────────
-# MEMBER 2 — Text Preprocessing
-# ─────────────────────────────────────────
+# — Text Preprocessing
 
 # Combine title and text into one column for preprocessing
 df["content"] = df["title"] + " " + df["text"]
 
 # 1. Punctuation removal
-df["content"] = df["content"].apply(
-    lambda text: text.translate(str.maketrans("", "", string.punctuation))
-)
+df["content"] = df["content"].apply(lambda text: text.translate(str.maketrans("", "", string.punctuation)))
 
 # 2. Case Folding - convert all text to lowercase
 df["content"] = df["content"].str.lower()
@@ -77,20 +70,16 @@ df["tokens"] = df["content"].apply(word_tokenize)
 
 # 4. Stop word removal - remove common words that add no value
 stop_words = set(stopwords.words("english"))
-df["tokens"] = df["tokens"].apply(
-    lambda tokens: [w for w in tokens if w not in stop_words]
-)
+df["tokens"] = df["tokens"].apply(lambda tokens: [w for w in tokens if w not in stop_words])
 
 # 5. Lemmatization - reduce words to their base dictionary form
 lemmatizer = WordNetLemmatizer()
-df["tokens"] = df["tokens"].apply(
-    lambda tokens: [lemmatizer.lemmatize(w) for w in tokens]
-)
+df["tokens"] = df["tokens"].apply(lambda tokens: [lemmatizer.lemmatize(w) for w in tokens])
 
 # Rejoin tokens into a single clean string
 df["clean_text"] = df["tokens"].apply(lambda tokens: " ".join(tokens))
 
 df["clean_text"].head()
 
-# Save preprocessed data for Members 3 & 4
+# Save preprocessed data
 df[["clean_text", "label"]].to_csv("preprocessed_news.csv", index=False)
