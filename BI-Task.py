@@ -6,6 +6,9 @@ import string
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 nltk.download("punkt")
 nltk.download("stopwords")
@@ -79,7 +82,33 @@ df["tokens"] = df["tokens"].apply(lambda tokens: [lemmatizer.lemmatize(w) for w 
 # Rejoin tokens into a single clean string
 df["clean_text"] = df["tokens"].apply(lambda tokens: " ".join(tokens))
 
+# Encode Labels
+encoder = LabelEncoder()
+df["label_num"] = encoder.fit_transform(df["label"])
+
+# Train/Test Split
+X = df["clean_text"]
+y = df["label_num"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Bag of Words (BoW)
+bow_vectorizer = CountVectorizer(max_features=5000)
+
+X_train_bow = bow_vectorizer.fit_transform(X_train)
+X_test_bow = bow_vectorizer.transform(X_test)
+
+# TF-IDF
+tfidf_vectorizer = TfidfVectorizer(max_features=5000)
+
+X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+print("BoW shape:", X_train_bow.shape)
+print("TF-IDF shape:", X_train_tfidf.shape)
+
 df["clean_text"].head()
 
 # Save preprocessed data
 df[["clean_text", "label"]].to_csv("preprocessed_news.csv", index=False)
+
