@@ -9,6 +9,10 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.ensemble import RandomForestClassifier
+
 
 nltk.download("punkt")
 nltk.download("stopwords")
@@ -112,3 +116,43 @@ df["clean_text"].head()
 # Save preprocessed data
 df[["clean_text", "label"]].to_csv("preprocessed_news.csv", index=False)
 
+# Initialize and learn the model LogisticRegression
+print("\n--- Training Logistic Regression Model ---")
+lr_model = LogisticRegression(max_iter=1000)
+lr_model.fit(X_train_tfidf, y_train)
+
+# Predict the labels for the test set
+y_pred_lr = lr_model.predict(X_test_tfidf)
+
+# Evaluate the model performance
+print(f"Logistic Regression Accuracy: {accuracy_score(y_test, y_pred_lr):.4f}")
+print(f"Logistic Regression F1-Score: {f1_score(y_test, y_pred_lr):.4f}")
+print("\nDetailed Classification Report for Logistic Regression:\n", classification_report(y_test, y_pred_lr))
+
+# Initialize and train Random Forest Classifier
+print("\n--- Training Random Forest Model ---")
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train_tfidf, y_train)
+y_pred_rf = rf_model.predict(X_test_tfidf)
+
+# Evaluate the model performance
+print(f"Random Forest Accuracy: {accuracy_score(y_test, y_pred_rf):.4f}")
+print(f"Random Forest F1-Score: {f1_score(y_test, y_pred_rf):.4f}")
+print("\nClassification Report for Random Forest:\n", classification_report(y_test, y_pred_rf))
+
+# Final Model Comparison and Selection
+print("\n--- Model Comparison ---")
+
+lr_acc = accuracy_score(y_test, y_pred_lr)
+lr_f1 = f1_score(y_test, y_pred_lr)
+
+rf_acc = accuracy_score(y_test, y_pred_rf)
+rf_f1 = f1_score(y_test, y_pred_rf)
+
+print(f"Logistic Regression: Acc={lr_acc:.4f}, F1={lr_f1:.4f}")
+print(f"Random Forest: Acc={rf_acc:.4f}, F1={rf_f1:.4f}")
+
+if (rf_acc + rf_f1) > (lr_acc + lr_f1):
+    print("Best Model: Random Forest (based on Accuracy and F1-Score)")
+else:
+    print("Best Model: Logistic Regression (based on Accuracy and F1-Score)")
