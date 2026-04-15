@@ -20,17 +20,17 @@ nltk.download("punkt_tab")
 fake_df = pd.read_csv("Fake.csv")
 true_df = pd.read_csv("True.csv")
 
-fake_df["label"] = "Fake"
-true_df["label"] = "Real"
+fake_df = fake_df.assign(label="Fake")
+true_df = true_df.assign(label="Real")
 df = pd.concat([fake_df, true_df], ignore_index=True)
 
 df.info()
 
+print("Duplicates count:",df.duplicated().sum())
 df = df.drop_duplicates()
 df = df.reset_index(drop=True)
 
-df.isna().sum()
-
+print("Missing count:\n",df.isna().sum())
 df["title"] = df["title"].fillna("")
 df["text"]  = df["text"].fillna("")
 
@@ -104,7 +104,7 @@ print("\n---- Model Comparison ----")
 print(f"Logistic Regression: Accuracy={lr_acc:.4f}, f1_score={lr_f1:.4f}")
 print(f"Random Forest: Accuracy={rf_acc:.4f}, f1_score={rf_f1:.4f}")
 
-if (rf_acc + rf_f1) > (lr_acc + lr_f1):
-    print("Best Model: Random Forest")
+if rf_f1 > lr_f1:
+    print("(Based on the f1_score) Best Model: Random Forest")
 else:
-    print("Best Model: Logistic Regression")
+    print("(Based on the f1_score)Best Model: Logistic Regression")
